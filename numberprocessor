@@ -13,7 +13,7 @@ public class Numberprocessor {
      * @return A message describing what happened during processing
      */
  
-    public Integer getNumber(){
+    public Integer getInteger(){
         Integer answer =  -1;
         while (answer  == -1){
             String userInput = JOptionPane.showInputDialog("Enter an Integer:");
@@ -49,12 +49,52 @@ public class Numberprocessor {
         // make an object out of this so we can call out funtions 
         Numberprocessor processor = new Numberprocessor();
         
+        processor.showMessage("This is the Number Guessing Game!");
+        processor.showMessage("Enter Number from 1-100 I wont peek");
+        Integer userNum = processor.getInteger();
+        Integer guess =50;
+        Integer low =1;
+        Integer high =100;
         
+        final int TOO_HIGH =1;
+        final int TOO_LOW =2;
+        final int RIGHT   =3;
+        int feedback;
+        Boolean keep_playing = true; 
+        while (keep_playing){
+
+            processor.showMessage("is it" + guess + "?");
+            processor.showMessage("Eneter 1 for too high, 2 for too low, 3 if its right ");
+            feedback = processor.getInteger();
+            if (feedback == RIGHT){
+                processor.showMessage("computer wins");
+                keep_playing = false;
+                if (guess != userNum){
+                    processor.showMessage("wait, you let me win");
+                    
+                }
+            
+            }
+            else if(feedback == TOO_HIGH){
+                    high = guess;
+                    guess = (low + high)/2;
+            }
+            else if(feedback == TOO_LOW){
+                low =guess;
+                guess = (low + high)/2;
+
+            }
+            else {
+                processor.showMessage("thats not 1, 2, 3 so I give up");
+                keep_playing = false;
+            }
+        }
+        /*
         // Test Case 1: Ask for a number
         //input is always a string
-        String userInput = JOptionPane.showInputDialog("Enter a whole number:");
+        //String userInput = JOptionPane.showInputDialog("Enter a whole number:");
         //now convert it into a number 
-        Integer answer = processor.process(userInput);
+        //Integer answer = processor.process(userInput);
         //finally, show what we did 
         if (answer == -1) {
             JOptionPane.showMessageDialog(null, "that's not an integer");
@@ -68,9 +108,14 @@ public class Numberprocessor {
         userInput = JOptionPane.showInputDialog("Try entering something that isn't a whole number:");
         answer = processor.process(userInput);
         JOptionPane.showMessageDialog(null, answer);
+        */
 
     }
+    public void showMessage(String Message){
+        JOptionPane.showMessageDialog(null, Message);
+    }
 }    
+    
 
 
 

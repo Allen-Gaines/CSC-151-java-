@@ -1,0 +1,261 @@
+package com.mycompany.mavenproject1;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Mavenproject1 extends JFrame {
+    // Section decoding maps
+    private static final Map<String, String> SESSION_MAP = new HashMap<>() {{
+        put("0", "16 Week");
+        put("1", "1st Eight Week");
+        put("2", "2nd Eight Week");
+        put("3", "12 Week Session");
+        put("5", "Off Cycle");
+        put("6", "1st Four Week Session");
+        put("7", "2nd Four Week Session");
+        put("8", "3rd Four Week Session");
+        put("9", "4th Four Week Session");
+    }};
+
+    private static final Map<String, String> LOCATION_MAP = new HashMap<>() {{
+        put("0", "Main Campus");
+        put("1", "Fort Bragg");
+        put("3", "Spring Lake Center");
+        put("4", "Botanical Garden Center");
+        put("9", "Online");
+        put("B", "Blended (Hybrid)");
+        put("C", "Collision");
+        put("D", "Developmental/Support Co-requisite");
+        put("F", "Flex");
+        put("H", "High School - County");
+        put("L", "Learning Communities");
+        put("P", "High School - Polytech");
+        put("R", "Ford");
+        put("V", "Virtual Classroom");
+        put("X", "Off Campus");
+        put("Y", "HyFlex");
+    }};
+
+    private static final Map<String, String> TIME_MAP = new HashMap<>() {{
+        put("01", "Day classes");
+        put("51", "Night classes");
+        put("61", "Weekend classes");
+    }};
+
+    // Main class variables
+    private ArrayList<Firework> fireworks;
+    private Timer timer;
+    private String userName;
+
+    // Firework inner class
+    private class Firework {
+        int x, y;
+        int size;
+        Color color;
+        int life;
+        ArrayList<Particle> particles;
+        
+        public Firework(int x, int y) {
+            this.x = x;
+            this.y = y;
+            this.size = 10;
+            this.color = new Color(
+                new Random().nextInt(255),
+                new Random().nextInt(255),
+                new Random().nextInt(255)
+            );
+            this.life = 50;
+            this.particles = new ArrayList<>();
+            explode();
+        }
+        
+        private void explode() {
+            for (int i = 0; i < 30; i++) {
+                double angle = 2 * Math.PI * i / 30;
+                double speed = 3;
+                particles.add(new Particle(
+                    x, y,
+                    speed * Math.cos(angle),
+                    speed * Math.sin(angle),
+                    color
+                ));
+            }
+        }
+    }
+    
+    // Particle inner class
+    private class Particle {
+        double x, y;
+        double dx, dy;
+        Color color;
+        
+        public Particle(double x, double y, double dx, double dy, Color color) {
+            this.x = x;
+            this.y = y;
+            this.dx = dx;
+            this.dy = dy;
+            this.color = color;
+        }
+        
+        public void update() {
+            x += dx;
+            y += dy;
+            dy += 0.1;
+        }
+    }
+    
+    // Method to decode section number
+    private String decodeSection(String sectionNumber) {
+        if (sectionNumber == null || sectionNumber.length() != 4) {
+            return "Invalid section number";
+        }
+
+        String session = sectionNumber.substring(0, 1);
+        String location = sectionNumber.substring(1, 2);
+        String timeSlot = sectionNumber.substring(2, 4);
+        
+        StringBuilder description = new StringBuilder();
+        description.append("Course Details:\n");
+        description.append("Session: ").append(SESSION_MAP.getOrDefault(session, "Unknown Session")).append("\n");
+        description.append("Location: ").append(LOCATION_MAP.getOrDefault(location, "Unknown Location")).append("\n");
+        description.append("Time: ").append(TIME_MAP.getOrDefault(timeSlot, "Unknown Time Slot")).append("\n");
+        description.append("Course Number: ").append(sectionNumber.substring(2));
+
+        return description.toString();
+    }
+
+    // Constructor for fireworks window
+    public Mavenproject1(String userName) {
+        this.userName = userName;
+        fireworks = new ArrayList<>();
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setBackground(Color.BLACK);
+        setUndecorated(true);
+        
+        timer = new Timer(20, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (new Random().nextInt(20) == 0) {
+                    fireworks.add(new Firework(
+                        new Random().nextInt(getWidth()),
+                        new Random().nextInt(getHeight()/2) + getHeight()/2
+                    ));
+                }
+                repaint();
+            }
+        });
+        
+        addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                dispose();
+                showGoodbye();
+            }
+        });
+    }
+    
+    // Paint method for fireworks
+    public void paint(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        g2d.setColor(new Color(0, 0, 0, 20));
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+        
+        for (Firework f : fireworks) {
+            for (Particle p : f.particles) {
+                g2d.setColor(p.color);
+                g2d.fillOval((int)p.x, (int)p.y, 3, 3);
+                p.update();
+            }
+            f.life--;
+        }
+        
+        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+        g2d.setColor(Color.WHITE);
+        String message = "Welcome " + userName + "!";
+        FontMetrics fm = g2d.getFontMetrics();
+        g2d.drawString(message, 
+            (getWidth() - fm.stringWidth(message)) / 2,
+            getHeight() / 2);
+        
+        g2d.setFont(new Font("Arial", Font.PLAIN, 20));
+        String clickMessage = "Click anywhere to continue...";
+        fm = g2d.getFontMetrics();
+        g2d.drawString(clickMessage,
+            (getWidth() - fm.stringWidth(clickMessage)) / 2,
+            getHeight() - 50);
+        
+        fireworks.removeIf(f -> f.life <= 0);
+    }
+    
+    // Goodbye message method
+    private void showGoodbye() {
+        JOptionPane.showMessageDialog(null, 
+            "<html>" +
+            "<div style='background-color: #F0F0F0; padding: 10px; text-align: center;'>" +
+            "<span style='color: #FF4500; font-size: 14pt;'>Thank you for using our program,</span><br>" +
+            "<span style='color: #4B0082; font-size: 16pt; font-weight: bold;'>" + userName + "</span><br>" +
+            "<span style='color: #008B8B; font-size: 14pt;'>Come back soon!</span> 👋" +
+            "</div></html>",
+            "Goodbye", 
+            JOptionPane.INFORMATION_MESSAGE);
+        System.exit(0);
+    }
+    
+    // Main method
+    public static void main(String[] args) {
+        // Name input
+        String userName = JOptionPane.showInputDialog(null, 
+            "<html><span style='color: purple; font-size: 14pt;'>Please enter your name:</span></html>", 
+            "Name Input", 
+            JOptionPane.QUESTION_MESSAGE);
+            
+        if (userName == null || userName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Name is required. Program will exit.", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        }
+        
+        // Section number input
+        String sectionNumber = JOptionPane.showInputDialog(null, 
+            "<html><span style='color: blue; font-size: 14pt;'>Enter your 4-digit course section number:</span></html>", 
+            "Section Number", 
+            JOptionPane.QUESTION_MESSAGE);
+        
+        // Create application instance
+        Mavenproject1 app = new Mavenproject1(userName);
+        String sectionDetails = app.decodeSection(sectionNumber);
+        
+        // Format the section details for HTML display
+        String formattedDetails = sectionDetails.replace("\n", "<br>");
+        
+        // Welcome message with course details
+        JOptionPane.showMessageDialog(null, 
+            "<html>" +
+            "<div style='text-align: center; background-color: #F5F5F5; padding: 15px; border-radius: 10px;'>" +
+            "🌟 <span style='color: #3366CC; font-size: 16pt; font-family: Arial;'>Welcome,</span> 🌟<br>" +
+            "<span style='color: #009900; font-size: 18pt; font-family: Arial; font-weight: bold;'>" + userName + "!</span><br><br>" +
+            "<span style='color: #FF6600; font-size: 14pt; font-family: Arial;'>Your Course Information:</span><br>" +
+            "<div style='text-align: left; margin: 10px 20px; padding: 10px; background-color: #FFFFFF; " +
+            "border-radius: 5px; border: 1px solid #DDDDDD;'>" +
+            "<span style='color: #333333; font-size: 12pt; font-family: Arial;'>" + 
+            formattedDetails.replace("Course Details:", 
+                                    "<span style='color: #990000; font-weight: bold;'>Course Details:</span>") + 
+            "</span>" +
+            "</div><br>" +
+            "<span style='color: #666666; font-size: 10pt;'>Click 'OK' to continue to the celebration!</span>" +
+            "</div></html>",
+            "Welcome", 
+            JOptionPane.INFORMATION_MESSAGE);
+            
+        // Show fireworks celebration
+        app.setVisible(true);
+        app.timer.start();
+    }
+}

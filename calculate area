@@ -1,0 +1,187 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ */
+package com.mycompany.caculatearea.java;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ *
+ * @author gainesa4579
+ */
+public class CaculateareaJava {
+    public static void main(String[] args) {
+        // Ask if the user wants to run the program
+        int choice = JOptionPane.showConfirmDialog(null,
+            "Do you want to calculate areas of shapes?",
+            "Area Calculator",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            ShapeCalculator.calculateShapeArea();
+        } else {
+            System.out.println("Hello World!");
+        }
+    }
+}
+
+// Shape Calculator class from previous code
+class ShapeCalculator {
+    // Shape calculation method
+    public static void calculateShapeArea() {
+        boolean continueCalculating = true;
+        
+        while (continueCalculating) {
+            // Ask if shape is 3D or 2D
+            int dimensionType = JOptionPane.showConfirmDialog(null,
+                "Is the shape 3D?",
+                "Shape Dimension",
+                JOptionPane.YES_NO_OPTION);
+            
+            if (dimensionType == JOptionPane.YES_OPTION) {
+                calculate3DShapeArea();
+            } else {
+                calculate2DShapeArea();
+            }
+            
+            // Ask if the user wants to calculate another shape
+            int choice = JOptionPane.showConfirmDialog(null,
+                "Do you want to calculate another shape?",
+                "Continue",
+                JOptionPane.YES_NO_OPTION);
+            
+            // Update the loop control variable based on user's choice
+            continueCalculating = (choice == JOptionPane.YES_OPTION);
+        }
+    }
+    
+    private static void calculate3DShapeArea() {
+        // Get shape type from user
+        String[] shapes = {"Sphere", "Cube", "Cylinder", "Cone"};
+        String selectedShape = (String) JOptionPane.showInputDialog(null,
+            "Select a 3D shape:",
+            "Shape Selection",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            shapes,
+            shapes[0]);
+        
+        if (selectedShape != null) {
+            double result = 0;
+            
+            switch (selectedShape) {
+                case "Sphere":
+                    // Get radius for sphere
+                    double radius = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the radius of the sphere:"));
+                    // Calculate surface area: 4πr²
+                    result = 4 * Math.PI * Math.pow(radius, 2);
+                    break;
+                    
+                case "Cube":
+                    // Get side length for cube
+                    double side = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the side length of the cube:"));
+                    // Calculate surface area: 6a²
+                    result = 6 * Math.pow(side, 2);
+                    break;
+                    
+                case "Cylinder":
+                    // Get radius and height for cylinder
+                    double cylinderRadius = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the radius of the cylinder:"));
+                    double cylinderHeight = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the height of the cylinder:"));
+                    // Calculate surface area: 2πr² + 2πrh
+                    result = 2 * Math.PI * Math.pow(cylinderRadius, 2) + 
+                             2 * Math.PI * cylinderRadius * cylinderHeight;
+                    break;
+                    
+                case "Cone":
+                    // Get radius and height for cone
+                    double coneRadius = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the radius of the cone:"));
+                    double coneHeight = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the height of the cone:"));
+                    // Calculate slant height (l) using Pythagoras
+                    double slantHeight = Math.sqrt(Math.pow(coneRadius, 2) + 
+                                                Math.pow(coneHeight, 2));
+                    // Calculate surface area: πr² + πrl
+                    result = Math.PI * Math.pow(coneRadius, 2) + 
+                             Math.PI * coneRadius * slantHeight;
+                    break;
+            }
+            
+            // Display the result with appropriate formatting
+            JOptionPane.showMessageDialog(null,
+                String.format("The surface area of the %s is: %.2f square units", 
+                    selectedShape, result),
+                "Result",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    private static void calculate2DShapeArea() {
+        // Get shape type from user
+        String[] shapes = {"Circle", "Square", "Rectangle", "Triangle"};
+        String selectedShape = (String) JOptionPane.showInputDialog(null,
+            "Select a 2D shape:",
+            "Shape Selection",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            shapes,
+            shapes[0]);
+        
+        if (selectedShape != null) {
+            double result = 0;
+            
+            switch (selectedShape) {
+                case "Circle":
+                    // Get radius for circle
+                    double radius = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the radius of the circle:"));
+                    // Calculate area: πr²
+                    result = Math.PI * Math.pow(radius, 2);
+                    break;
+                    
+                case "Square":
+                    // Get side length for square
+                    double side = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the side length of the square:"));
+                    // Calculate area: a²
+                    result = Math.pow(side, 2);
+                    break;
+                    
+                case "Rectangle":
+                    // Get length and width for rectangle
+                    double length = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the length of the rectangle:"));
+                    double width = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the width of the rectangle:"));
+                    // Calculate area: l × w
+                    result = length * width;
+                    break;
+                    
+                case "Triangle":
+                    // Get base and height for triangle
+                    double base = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the base of the triangle:"));
+                    double height = Double.parseDouble(JOptionPane.showInputDialog(
+                        "Enter the height of the triangle:"));
+                    // Calculate area: (b × h)/2
+                    result = (base * height) / 2;
+                    break;
+            }
+            
+            // Display the result with appropriate formatting
+            JOptionPane.showMessageDialog(null,
+                String.format("The area of the %s is: %.2f square units", 
+                    selectedShape, result),
+                "Result",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+}

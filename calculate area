@@ -5,39 +5,256 @@ package com.mycompany.caculatearea.java;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  *
  * @author gainesa4579
  */
-public class CaculateareaJava {
+public class CaculateareaJava extends JFrame {
+    // Main class variables for fireworks
+    private ArrayList<Firework> fireworks;
+    private Timer timer;
+    private String userName;
+    
     public static void main(String[] args) {
-        // Ask if the user wants to run the program
-        int choice = JOptionPane.showConfirmDialog(null,
-            "Do you want to calculate areas of shapes?",
-            "Area Calculator",
-            JOptionPane.YES_NO_OPTION);
+        // Get user name
+        String userName = JOptionPane.showInputDialog(null, 
+            "<html><span style='color: purple; font-size: 14pt;'>Please enter your name:</span></html>", 
+            "Welcome", 
+            JOptionPane.QUESTION_MESSAGE);
         
-        if (choice == JOptionPane.YES_OPTION) {
-            ShapeCalculator.calculateShapeArea();
+        if (userName != null && !userName.trim().isEmpty()) {
+            // Show welcome message
+            JOptionPane.showMessageDialog(null, 
+                "<html>" +
+                "<div style='text-align: center;'>" +
+                "🌟 <span style='color: blue; font-size: 16pt; font-family: Arial;'>Welcome,</span> 🌟<br>" +
+                "<span style='color: green; font-size: 18pt; font-family: Comic Sans MS;'>" + userName + "!</span><br>" +
+                "<span style='color: #FF69B4; font-size: 12pt;'>to the Shape Area Calculator</span><br>" +
+                "</div></html>",
+                "Welcome", 
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Show fireworks
+            CaculateareaJava app = new CaculateareaJava(userName);
+            app.setVisible(true);
+            
+            // Wait for fireworks to finish (5 seconds)
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+            app.setVisible(false);
+            app.dispose();
+            
+            // Ask if the user wants to run the program
+            int choice = JOptionPane.showConfirmDialog(null,
+                "Do you want to calculate areas of shapes?",
+                "Area Calculator",
+                JOptionPane.YES_NO_OPTION);
+            
+            if (choice == JOptionPane.YES_OPTION) {
+                ShapeCalculator.calculateShapeArea(userName);
+            }
+            
+            // Show goodbye message
+            showGoodbye(userName);
         } else {
             System.out.println("Hello World!");
         }
     }
+    
+    // Constructor for fireworks window
+    public CaculateareaJava(String userName) {
+        this.userName = userName;
+        
+        // Initialize fireworks
+        fireworks = new ArrayList<>();
+        Random random = new Random();
+        
+        setTitle("Welcome " + userName + "!");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setBackground(Color.BLACK);
+        
+        // Create timer for animation
+        timer = new Timer(20, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add new firework occasionally
+                if (random.nextInt(20) == 0) {
+                    fireworks.add(new Firework());
+                }
+                
+                // Update and remove dead fireworks
+                for (int i = fireworks.size() - 1; i >= 0; i--) {
+                    Firework f = fireworks.get(i);
+                    f.update();
+                    if (f.isDead()) {
+                        fireworks.remove(i);
+                    }
+                }
+                
+                repaint();
+            }
+        });
+        timer.start();
+    }
+    
+    // Paint method for fireworks
+    @Override
+    public void paint(Graphics g) {
+        // Create double buffer
+        Image offscreen = createImage(getWidth(), getHeight());
+        Graphics2D offg = (Graphics2D) offscreen.getGraphics();
+        
+        // Clear background
+        offg.setColor(Color.BLACK);
+        offg.fillRect(0, 0, getWidth(), getHeight());
+        
+        // Draw all fireworks
+        for (Firework f : fireworks) {
+            f.draw(offg);
+        }
+        
+        // Draw to screen
+        g.drawImage(offscreen, 0, 0, this);
+    }
+    
+    // Firework inner class
+    private class Firework {
+        private ArrayList<Particle> particles;
+        private int lifespan;
+        
+        public Firework() {
+            Random random = new Random();
+            particles = new ArrayList<>();
+            
+            // Create explosion
+            int x = random.nextInt(getWidth());
+            int y = random.nextInt(getHeight() / 2);
+            Color color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+            
+            for (int i = 0; i < 100; i++) {
+                particles.add(new Particle(x, y, color));
+            }
+            
+            lifespan = 100;
+        }
+        
+        public void update() {
+            for (Particle p : particles) {
+                p.update();
+            }
+            lifespan--;
+        }
+        
+        public void draw(Graphics2D g) {
+            for (Particle p : particles) {
+                p.draw(g);
+            }
+        }
+        
+        public boolean isDead() {
+            return lifespan <= 0;
+        }
+    }
+    
+    // Particle inner class
+    private class Particle {
+        private double x, y;
+        private double vx, vy;
+        private Color color;
+        
+        public Particle(int x, int y, Color color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            
+            Random random = new Random();
+            double angle = random.nextDouble() * Math.PI * 2;
+            double speed = random.nextDouble() * 2 + 1;
+            
+            vx = Math.cos(angle) * speed;
+            vy = Math.sin(angle) * speed;
+        }
+        
+        public void update() {
+            x += vx;
+            y += vy;
+            vy += 0.03; // Gravity
+        }
+        
+        public void draw(Graphics2D g) {
+            g.setColor(color);
+            g.fillOval((int) x, (int) y, 3, 3);
+        }
+    }
+    
+    // Goodbye message method
+    private static void showGoodbye(String userName) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Goodbye!");
+        dialog.setSize(400, 300);
+        dialog.setLocationRelativeTo(null);
+        dialog.setLayout(new BorderLayout());
+        
+        JLabel label = new JLabel(
+            "<html>" +
+            "<div style='text-align: center;'>" +
+            "<span style='color: blue; font-size: 24pt; font-family: Arial;'>Goodbye,</span><br>" +
+            "<span style='color: green; font-size: 22pt; font-family: Comic Sans MS;'>" + userName + "!</span><br>" +
+            "<span style='color: #FF69B4; font-size: 20pt;'>👋</span>" +
+            "</div></html>",
+            JLabel.CENTER
+        );
+        dialog.add(label, BorderLayout.CENTER);
+        
+        // Create waving hand animation
+        Timer waveTimer = new Timer(300, new ActionListener() {
+            private int count = 0;
+            private String[] waves = {"👋", "🖐️"};
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (count < 10) {
+                    label.setText(
+                        "<html>" +
+                        "<div style='text-align: center;'>" +
+                        "<span style='color: blue; font-size: 24pt; font-family: Arial;'>Goodbye,</span><br>" +
+                        "<span style='color: green; font-size: 22pt; font-family: Comic Sans MS;'>" + userName + "!</span><br>" +
+                        "<span style='color: #FF69B4; font-size: 20pt;'>" + waves[count % 2] + "</span>" +
+                        "</div></html>"
+                    );
+                    count++;
+                } else {
+                    ((Timer)e.getSource()).stop();
+                    dialog.dispose();
+                }
+            }
+        });
+        
+        dialog.setVisible(true);
+        waveTimer.start();
+    }
 }
 
-// Shape Calculator class from previous code
+// Shape Calculator class
 class ShapeCalculator {
     // Shape calculation method
-    public static void calculateShapeArea() {
+    public static void calculateShapeArea(String userName) {
         boolean continueCalculating = true;
         
         while (continueCalculating) {
             // Ask if shape is 3D or 2D
             int dimensionType = JOptionPane.showConfirmDialog(null,
-                "Is the shape 3D?",
+                "Hi " + userName + ", is the shape 3D?",
                 "Shape Dimension",
                 JOptionPane.YES_NO_OPTION);
             
@@ -49,7 +266,7 @@ class ShapeCalculator {
             
             // Ask if the user wants to calculate another shape
             int choice = JOptionPane.showConfirmDialog(null,
-                "Do you want to calculate another shape?",
+                "Do you want to calculate another shape, " + userName + "?",
                 "Continue",
                 JOptionPane.YES_NO_OPTION);
             
